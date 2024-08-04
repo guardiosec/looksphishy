@@ -1,0 +1,11 @@
+version: "3"
+services:
+  sec_check:
+    build: .
+    ports:
+      - "8080:8080"
+    working_dir: /code
+    container_name: looksphishy
+    image: looksphishy_image
+    command: "streamlit run app.py --server.port 8080 --server.headless true"
+

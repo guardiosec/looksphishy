@@ -1,0 +1,10 @@
+google-cloud-aiplatform
+pandas
+tqdm
+pathos
+streamlit
+selenium
+vertexai
+scipy
+flask
+jsonschema

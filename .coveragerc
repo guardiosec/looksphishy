@@ -1,0 +1,15 @@
+[run]
+omit =
+    */test*
+    */_remote_module_non_scriptable.py
+    */config-3.py
+    */config.py
+
+
+[report]
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+    # Don't complain about missing debug-only code:
+    def __repr__
+    if self\.debug
