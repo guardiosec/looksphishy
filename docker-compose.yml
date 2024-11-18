@@ -1,11 +1,29 @@
-version: "3"
 services:
+  ollama-app:
+    image: ollama/ollama:0.4.2
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+    networks:
+      - app-network
+    command: serve
+
   sec_check:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     working_dir: /code
     container_name: looksphishy
     image: looksphishy_image
-    command: "streamlit run app.py --server.port 8080 --server.headless true"
+    restart: unless-stopped
+    command: streamlit run app.py --server.port 8080 --server.headless true
+    depends_on:
+      - ollama-app
+    networks:
+      - app-network
 
+networks:
+  app-network:
+    driver: bridge

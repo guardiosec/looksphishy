@@ -22,3 +22,5 @@ setuptools
 packaging
 openai
 git+https://github.com/openai/CLIP.git
+beautifulsoup4
+requests

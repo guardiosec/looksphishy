@@ -2,41 +2,46 @@ FROM python:3.10-slim
 
 ENV GOOGLE_APPLICATION_CREDENTIALS /var/secrets/google/key.json
 ENV CHROME_DRIVER_PATH /usr/bin/chromedriver
+# forces Python to run in unbuffered mode
+ENV PYTHONUNBUFFERED=1 
 
 WORKDIR /code
-RUN apt-get update && apt-get install -y gnupg
-RUN curl -fsSL https://deb.debian.org/debian-archive/debian-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/debian-archive-keyring.gpg
-RUN apt-get update && \
-    apt-get install -y \
-    manpages-dev \
-    build-essential \
-    curl \
-    gnupg \
-    lsb-release \
-    htop \
-    vim \
-    chromium \
-    chromium-driver && rm -rf /var/lib/apt/lists/* && chmod +x $CHROME_DRIVER_PATH
+# Install build dependencies
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    curl \ 
+    gnupg && \
+    rm -rf /var/lib/apt/lists/* && apt-get clean
 
+# Add Debian archive keyring
+RUN curl -fsSL http://ftp.debian.org/debian/pool/main/d/debian-archive-keyring/debian-archive-keyring_2023.3+deb12u1_all.deb -o keyring.deb && \
+    dpkg -i keyring.deb && \
+    rm keyring.deb
+
+# Set up Google Cloud SDK repository
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
-    | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-
-RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+    | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg \
     | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
 
-RUN apt-get update && \
-    apt-get install -y google-cloud-sdk
+# Install required packages
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates\
+    git\
+    google-cloud-sdk \
+    chromium \
+    chromium-driver && rm -rf /var/lib/apt/lists/* && apt-get clean
 
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# TODO: Download ollama + ollama run llama3
+# Set up chrome driver
+RUN chmod +x $CHROME_DRIVER_PATH
 
 ENV PATH="/usr/lib/google-cloud-sdk/bin:${PATH}"
 
-COPY requirements_light.txt requirements.txt
+COPY requirements.txt requirements.txt
 
-RUN pip3 install -r requirements.txt
+RUN pip3 install --upgrade pip && pip3 install -r requirements.txt --no-cache-dir
 
 EXPOSE 8080
 

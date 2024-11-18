@@ -36,6 +36,13 @@ if 'page' not in st.session_state:
 def create_log_once():
     return init_logger(conf.LOGGER_NAME)
 
+@st.cache_resource
+def get_crawler():
+    return Crawler(use_cache=False,
+                   max_retries=3,  # Will retry 3 times before failing
+                   page_load_timeout=30  # 30 seconds timeout
+                   )
+
 
 logger = create_log_once()
 
@@ -50,7 +57,7 @@ page = st.sidebar.radio("Select Page", ["Looksphishy", "Add Your Own Brand"])
 if page == "Looksphishy":
     uploaded_file = None
     url_input = None
-    crawler_object = Crawler(use_cache=True)
+    crawler_object = get_crawler()
 
     col1, col2 = st.columns([20, 1])
 
